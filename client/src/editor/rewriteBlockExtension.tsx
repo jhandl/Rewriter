@@ -5,12 +5,15 @@ import React, { useState, useEffect, useRef } from 'react';
 
 // Custom event for block activation
 const BLOCK_ACTIVATED_EVENT = 'rewriteBlockActivated';
+// Custom event for Tab key to submit current block
+const TAB_SUBMIT_EVENT = 'rewriteBlockTabSubmit';
 
 // React component for rendering a RewriteBlock
-const RewriteBlockView: React.FC<{ node: any; updateAttributes: (attrs: any) => void; getPos: () => number }> = ({
+const RewriteBlockView: React.FC<{ node: any; updateAttributes: (attrs: any) => void; getPos: () => number; editor: any }> = ({
   node,
   updateAttributes,
   getPos,
+  editor,
 }) => {
   const [showOriginal, setShowOriginal] = useState(false);
   const { needsRewrite, originalText, isDeleted, lastEditedBy } = node.attrs;
@@ -49,6 +52,22 @@ const RewriteBlockView: React.FC<{ node: any; updateAttributes: (attrs: any) => 
     };
   }, [updateAttributes]);
 
+  // Listen for Tab submit event
+  useEffect(() => {
+    const handleTabSubmit = () => {
+      const { showOriginal, hasChanges, needsRewrite } = stateRef.current;
+      if (showOriginal && hasChanges && needsRewrite) {
+        setShowOriginal(false);
+        updateAttributes({ needsRewrite: false });
+      }
+    };
+
+    window.addEventListener(TAB_SUBMIT_EVENT, handleTabSubmit);
+    return () => {
+      window.removeEventListener(TAB_SUBMIT_EVENT, handleTabSubmit);
+    };
+  }, [updateAttributes]);
+
   // Auto-show original when user starts typing (text differs from original)
   useEffect(() => {
     if (needsRewrite && hasChanges) {
@@ -70,6 +89,25 @@ const RewriteBlockView: React.FC<{ node: any; updateAttributes: (attrs: any) => 
     setShowOriginal(false);
     if (hasChanges) {
       updateAttributes({ needsRewrite: false });
+    }
+  };
+
+  // Handle revert - restore original text and set needsRewrite back to true
+  const handleRevert = () => {
+    if (originalText && editor) {
+      // Use editor commands to replace the content
+      const pos = getPos();
+      const nodeSize = node.nodeSize;
+
+      // Delete current content and insert original
+      editor.chain()
+        .focus()
+        .deleteRange({ from: pos + 1, to: pos + nodeSize - 1 })
+        .insertContentAt(pos + 1, originalText)
+        .run();
+
+      updateAttributes({ needsRewrite: true });
+      setShowOriginal(false);
     }
   };
 
@@ -118,7 +156,7 @@ const RewriteBlockView: React.FC<{ node: any; updateAttributes: (attrs: any) => 
               <button
                 className="show-original-btn"
                 onClick={handleClose}
-                title="Close and submit"
+                title="Close and submit (Tab)"
               >
                 ✕
               </button>
@@ -129,7 +167,7 @@ const RewriteBlockView: React.FC<{ node: any; updateAttributes: (attrs: any) => 
     );
   }
 
-  // Already rewritten block - show eye icon to view original
+  // Already rewritten block - show eye icon and revert icon
   return (
     <NodeViewWrapper className="rewrite-block rewritten">
       {showOriginal && originalText && (
@@ -142,13 +180,22 @@ const RewriteBlockView: React.FC<{ node: any; updateAttributes: (attrs: any) => 
         <NodeViewContent className="block-content" />
         <div className="block-actions">
           {originalText && (
-            <button
-              className="show-original-btn"
-              onClick={() => setShowOriginal(!showOriginal)}
-              title="Show original text"
-            >
-              {showOriginal ? '✕' : '👁'}
-            </button>
+            <>
+              <button
+                className="show-original-btn"
+                onClick={() => setShowOriginal(!showOriginal)}
+                title="Show original text"
+              >
+                {showOriginal ? '✕' : '👁'}
+              </button>
+              <button
+                className="revert-btn"
+                onClick={handleRevert}
+                title="Revert to original"
+              >
+                ↩
+              </button>
+            </>
           )}
           {lastEditedBy && (
             <span className="edited-by-badge" title={`Edited by ${lastEditedBy}`}>
@@ -205,6 +252,11 @@ export const RewriteBlock = Node.create({
     return {
       // Insert a hard break (newline) instead of creating a new block
       Enter: () => this.editor.commands.setHardBreak(),
+      // Tab to submit the current edit
+      Tab: () => {
+        window.dispatchEvent(new CustomEvent(TAB_SUBMIT_EVENT));
+        return true; // Prevents default tab behavior
+      },
     };
   },
 

@@ -389,6 +389,28 @@ body {
   color: white;
 }
 
+.revert-btn {
+  background: var(--color-surface-hover);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.revert-btn:hover {
+  background: var(--color-warning);
+  border-color: var(--color-warning);
+  color: var(--color-bg);
+}
+
+.save-file-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .edited-by-badge {
   font-size: 0.75rem;
   color: var(--color-success);
