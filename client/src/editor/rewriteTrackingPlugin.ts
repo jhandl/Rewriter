@@ -10,7 +10,7 @@ export function createRewriteTrackingPlugin(options: RewriteTrackingOptions): Pl
   return new Plugin({
     key: rewriteTrackingPluginKey,
 
-    appendTransaction(transactions, oldState, newState) {
+    appendTransaction(transactions, _oldState, newState) {
       // Only process if there were actual changes
       const docChanged = transactions.some(tr => tr.docChanged);
       if (!docChanged) return null;
