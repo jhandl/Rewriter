@@ -229,7 +229,7 @@ const EditorInner: React.FC<{
 
   return (
     <div className="editor-container">
-      <div className="editor-header">
+      <div className="editor-toolbar">
         <div className="connection-status">
           <span className={`status-dot ${status}`}></span>
           {status === 'connected' ? 'Connected' : status === 'connecting' ? 'Connecting...' : 'Disconnected'}
@@ -239,7 +239,7 @@ const EditorInner: React.FC<{
             📄 {loadedFilename}
           </div>
         )}
-        <div className="header-actions">
+        <div className="toolbar-actions">
           <button onClick={handleLoadFile} className="load-file-btn">
             📂 Load File
           </button>
@@ -253,10 +253,6 @@ const EditorInner: React.FC<{
             onChange={handleFileChange}
             style={{ display: 'none' }}
           />
-        </div>
-        <div className="user-info">
-          <span className="user-color" style={{ backgroundColor: user.color }}></span>
-          {user.name}
         </div>
       </div>
       <EditorContent editor={editor} className="editor-content" />

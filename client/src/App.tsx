@@ -79,11 +79,12 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Collaborative Rewrite Editor</h1>
-        <div className="header-actions">
-          <span className="document-name">Document: {documentName}</span>
-          <button onClick={handleChangeName} className="change-name-btn">
-            Change Name
+        <h1>Rewriter</h1>
+        <div className="user-info-header">
+          <span className="user-color" style={{ backgroundColor: user.color }}></span>
+          <span className="user-name">{user.name}</span>
+          <button onClick={handleChangeName} className="change-name-btn" title="Change your name">
+            ✏️
           </button>
         </div>
       </header>
