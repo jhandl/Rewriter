@@ -63,13 +63,29 @@ body {
 }
 
 .app-header h1 {
-  font-size: 1.3rem;
+  font-size: 1.8rem;
   font-weight: 600;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff, #5f27cd);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: rainbow 3s ease infinite;
   margin: 0;
+}
+
+@keyframes rainbow {
+  0% {
+    background-position: 0% center;
+  }
+
+  50% {
+    background-position: 100% center;
+  }
+
+  100% {
+    background-position: 0% center;
+  }
 }
 
 .user-info-header {
